@@ -1,3 +1,8 @@
+![Alt text]([URL_or_relative_path_to_image](https://i.ibb.co/gPx5P9Z/banner.jpg))
+
+
+
+
 # Getting Started with Create React App
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
