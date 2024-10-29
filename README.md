@@ -1,8 +1,6 @@
 ![LOGO](https://i.ibb.co/gPx5P9Z/banner.jpg)
 
-
-
-
+#Welcome to AYUSHMITRA, an innovative web-based hospital monitoring system designed to simplify and streamline healthcare management.
 
 # Getting Started with Create React App
 
