@@ -1,26 +1,19 @@
 /* eslint-disable jsx-a11y/anchor-is-valid */
-import React, { useEffect } from 'react'
+import React from 'react'
 import { Link } from 'react-router-dom'
-import { setUser,clearUser } from './utils/UserSlice'
-import { getAuth, onAuthStateChanged,signOut  } from "firebase/auth";
-import { app } from './utils/firebase';
+import {clearUser } from './utils/UserSlice'
 import { useDispatch, useSelector } from 'react-redux';
 import { clearType } from './utils/TypeSlice'
 
 const Header = () => {
 
-  const auth = getAuth(app);
   const user = useSelector((state) => state.user.value);
   const dispatch = useDispatch();
   const type = useSelector((state)=>state.type.value)
 
   const handleClick = () =>{
-    const auth = getAuth();
-    signOut(auth).then(() => {
-      // Sign-out successful.
-    }).catch((error) => {
-      // An error happened.
-    });
+    dispatch(clearUser())
+    dispatch(clearType())
   }
 
   useEffect(()=>{

@@ -1,44 +1,35 @@
 /* eslint-disable jsx-a11y/alt-text */
 import React, { useRef, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
-import { app } from './utils/firebase';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { useDispatch } from 'react-redux';
 import { setType } from './utils/TypeSlice'
-import { getFirestore, doc, getDoc } from "firebase/firestore";
+import { setUser } from './utils/UserSlice';
 
 const LogIn = () => {
 
   const email = useRef(null);
   const password = useRef(null);
 
-  const auth = getAuth(app)
-  const db = getFirestore(app);
   const navigate = useNavigate();
   const [errorMessage,seterrorMessage] = useState(null);
   const dispatch = useDispatch();
-//   toast('signIn successfull')
 
-  const handleClick = () =>{
-    signInWithEmailAndPassword(auth, email.current.value, password.current.value)
-        .then((userCredential) => {
-        const user = userCredential.user;
-        const userRef = doc(db, "users", user.uid);
+  const handleClick = async() =>{
 
-        // Get the user's role from Firestore
-        // console.log('userref',userRef)
-        getDoc(userRef)
-            .then((docSnap) => {
-            if (docSnap.exists()) {
-                const role = docSnap.data().role;
-
-                // Dispatch the role and show success toast based on role
-                // console.log('role is',role)
-                dispatch(setType({ type: role }));
-
-                toast.success('SignIn successfully', {
+    try {
+        const response =  await fetch(`http://localhost:5000/api/check-patient-password?type=${"GET"}&value=${email.current.value}&password=${password.current.value}`);
+        const data = await response.json()
+        // console.log(data)
+        if (data.passwordMatch === undefined) {
+            // Error handling: Unable to check password
+            seterrorMessage('Email not found')
+        } else if (data.passwordMatch) {
+            // Password matches, return the user data
+            dispatch(setType({ type: "patient" }));
+            dispatch(setUser({uid:data.patient.aadhar,email:data.patient.email,userName:data.patient.name}))
+            toast.success('SignIn successfully', {
                 position: "top-center",
                 autoClose: 3000,
                 hideProgressBar: false,
@@ -47,50 +38,22 @@ const LogIn = () => {
                 draggable: true,
                 progress: undefined,
                 theme: "light",
-                onClose: () => {
-                    // Navigate to different dashboards based on role
-                    if (role === "hospital") {
-                        navigate('/');
-                    } else if (role === "patient"){
-                        navigate('/');
-                    } else {
-                        navigate('/'); // Default redirect
-                    }
-                }
-                });
-            } else {
-                console.log("No such document!");
-            }
-            })
-            .catch((error) => {
-                console.log("Error getting document:", error);
+                onClose: () => {navigate('/')}
             });
-        })
-        .catch((error) => {
-        seterrorMessage(error.code, error.message);
-        });
-        // .then((userCredential) => {
-        //     // Signed in 
-        //     const user = userCredential.user;
-        //     const userRef = doc(db, "users", user.uid);
+            return data.patient;
+        } else {
+            // Password is incorrect
+            seterrorMessage('wrong password');
+        }
+  
+        // dispatch(setUser({email:email.current.value,userName:userName.current.value}))        
+      } catch (error) {
+        console.error('Error adding patient:', error);
+        seterrorMessage(error.message || 'An error occurred. Please try again.');
+      }
+    
             
-        //     dispatch(setType({type:"patient"}))
-        //     toast.success('SignIn successfully', {
-        //         position: "top-center",
-        //         autoClose: 3000,
-        //         onClose: () => navigate('/'),
-        //         hideProgressBar: false,
-        //         closeOnClick: true,
-        //         pauseOnHover: true,
-        //         draggable: true,
-        //         progress: undefined,
-        //         theme: "light",
-        //         });
-        //     // ...
-        // })
-        // .catch((error) => {
-        //     seterrorMessage(error.code,error.message)
-        // });
+    
   }
 
   return (

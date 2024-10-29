@@ -1,12 +1,10 @@
 import React, { useRef, useState } from 'react'
 import { useDispatch } from 'react-redux'
 import { Link, useNavigate } from 'react-router-dom'
-import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
-import { app } from './utils/firebase';
-import { getFirestore, doc, getDoc } from "firebase/firestore";
 import { setType } from './utils/TypeSlice'
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import { setUser } from './utils/UserSlice';
 
 const Hlogin = () => {
 
@@ -15,58 +13,52 @@ const Hlogin = () => {
 
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const auth = getAuth(app)
-  const db = getFirestore(app);
   const [errorMessage,seterrorMessage] = useState(null)
 
-  const handleClick = () =>{
-    signInWithEmailAndPassword(auth, email.current.value, password.current.value)
-        .then((userCredential) => {
-        const user = userCredential.user;
-        const userRef = doc(db, "hospital", user.uid);
+  const handleClick = async() =>{
 
-        // Get the user's role from Firestore
-        // console.log('userref',userRef)
-        getDoc(userRef)
-            .then((docSnap) => {
-            if (docSnap.exists()) {
-                const role = docSnap.data().role;
-
-                // Dispatch the role and show success toast based on role
-                // console.log('role is',role)
-                dispatch(setType({ type: role }));
-
-                toast.success('SignIn successfully', {
-                position: "top-center",
-                autoClose: 3000,
-                hideProgressBar: false,
-                closeOnClick: true,
-                pauseOnHover: true,
-                draggable: true,
-                progress: undefined,
-                theme: "light",
-                onClose: () => {
-                    // Navigate to different dashboards based on role
-                    if (role === "hospital") {
-                        navigate('/');
-                    } else if (role === "patient"){
-                        navigate('/');
-                    } else {
-                        navigate('/'); // Default redirect
-                    }
-                }
-                });
-            } else {
-                console.log("No such document!");
-            }
-            })
-            .catch((error) => {
-                console.log("Error getting document:", error);
-            });
-        })
-        .catch((error) => {
-        seterrorMessage(error.code, error.message);
+    try{
+      const response =  await fetch(`http://localhost:5000/api/check-hospital-password?type=${"GET"}&value=${email.current.value}&password=${password.current.value}`);
+      const data = await response.json()
+      if (data.passwordMatch === undefined) {
+        // Error handling: Unable to check password
+        seterrorMessage('Email not found');
+    } else if (data.passwordMatch) {
+        // Password matches, return the user data
+        dispatch(setType({ type: "hospital" }));
+        dispatch(setUser({email:data.hospital.email,userName:data.hospital.hospitalName}))
+        toast.success('SignIn successfully', {
+            position: "top-center",
+            autoClose: 3000,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+            progress: undefined,
+            theme: "light",
+            onClose: () => {navigate('/')}
         });
+        return data.hospital;
+      } else {
+          // Password is incorrect
+          seterrorMessage('wrong password');
+      }
+    }catch(e){
+
+    }
+
+    dispatch(setType({ type: "Hospital" }));
+    toast.success('SignIn successfully', {
+      position: "top-center",
+      autoClose: 3000,
+      hideProgressBar: false,
+      closeOnClick: true,
+      pauseOnHover: true,
+      draggable: true,
+      progress: undefined,
+      theme: "light",
+      onClose: () => {navigate('/')}
+    });
   }
 
   return (
