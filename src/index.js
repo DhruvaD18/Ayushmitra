@@ -16,6 +16,7 @@ import UserProfile from './components/UserProfile';
 import Hlogin from './components/Hlogin';
 import HsignUp from './components/HsignUp';
 
+
 const Structure = () => {
   return (
     <div>
@@ -62,7 +63,8 @@ const appRouter = createBrowserRouter([
       {
         path:'/hospital-signUp',
         element:<HsignUp />
-      }
+      },
+     
     ]
   }
 ])
