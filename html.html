@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Heart Rate & SpO₂ Monitor</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+      margin: 0;
+      background-color: #f0f0f5;
+    }
+    h1 {
+      margin-bottom: 20px;
+      color: #333;
+    }
+    .charts-container {
+      display: flex;
+      justify-content: space-around;
+      width: 100%;
+    }
+    .chart-container {
+      width: 45%;
+      margin: 20px;
+    }
+    h2 {
+      text-align: center;
+    }
+    .button-container {
+      margin: 20px;
+    }
+    button {
+      margin: 5px;
+      padding: 10px 15px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+    .value-display {
+      margin-left: 10px;
+      font-weight: bold;
+    }
+    #notification {
+      margin-top: 20px;
+      font-size: 24px;
+      color: #e74c3c;
+      font-weight: bold;
+      display: inline-block;
+    }
+  </style>
+</head>
+<body>
+  <h1>
+    Please wait a few seconds to see the data...
+    <span class="value-display" id="heartRateDisplay">Heart Rate: -- bpm</span>
+    <span class="value-display" id="spo2Display">SpO₂: -- %</span>
+  </h1>
+  
+  <div class="button-container">
+    <button id="highBP">High BP</button>
+    <button id="lowBP">Low BP</button>
+    <button id="lowOxygen">Low Oxygen</button>
+  </div>
+  
+  <div class="charts-container">
+    <div class="chart-container">
+      <h2 id="heartRateTitle">Heart Rate (bpm): <span id="heartRateValue">--</span></h2>
+      <canvas id="heartRateChart" width="400" height="200"></canvas> <!-- Set width and height -->
+    </div>
+    <div class="chart-container">
+      <h2 id="spo2Title">SpO₂ (%): <span id="spo2Value">--</span></h2>
+      <canvas id="spo2Chart" width="400" height="200"></canvas> <!-- Set width and height -->
+    </div>
+  </div>
+  
+  <div id="notification"></div>
+
+  <script>
+    let currentHeartRate = 80; 
+    let currentSpO2 = 96;
+
+    const heartRateData = {
+      labels: [],
+      datasets: [{
+        label: 'Heart Rate (bpm)',
+        backgroundColor: 'rgba(255, 99, 132, 0.2)',
+        borderColor: 'rgba(255, 99, 132, 1)',
+        data: [],
+        fill: true,
+      }]
+    };
+
+    const spo2Data = {
+      labels: [],
+      datasets: [{
+        label: 'SpO₂ (%)',
+        backgroundColor: 'rgba(54, 162, 235, 0.2)',
+        borderColor: 'rgba(54, 162, 235, 1)',
+        data: [],
+        fill: true,
+      }]
+    };
+
+    const heartRateChart = new Chart(document.getElementById('heartRateChart'), {
+      type: 'line',
+      data: heartRateData,
+      options: {
+        responsive: true,
+        scales: {
+          x: { display: false },
+          y: {
+            min: 70,
+            max: 160,
+            ticks: { stepSize: 5 }
+          }
+        }
+      }
+    });
+
+    const spo2Chart = new Chart(document.getElementById('spo2Chart'), {
+      type: 'line',
+      data: spo2Data,
+      options: {
+        responsive: true,
+        scales: {
+          x: { display: false },
+          y: {
+            min: 90,
+            max: 100,
+            ticks: { stepSize: 2 }
+          }
+        }
+      }
+    });
+
+    function updateHeartRate() {
+      const now = new Date().toLocaleTimeString();
+      currentHeartRate += Math.floor(Math.random() * 5) - 2;
+      currentHeartRate = Math.max(74, Math.min(102, currentHeartRate));
+
+      document.getElementById('heartRateValue').textContent = currentHeartRate;
+      document.getElementById('heartRateDisplay').textContent = `Heart Rate: ${currentHeartRate} bpm`;
+
+      if (heartRateData.labels.length >= 20) heartRateData.labels.shift();
+      if (heartRateData.datasets[0].data.length >= 20) heartRateData.datasets[0].data.shift();
+      heartRateData.labels.push(now);
+      heartRateData.datasets[0].data.push(currentHeartRate);
+      heartRateChart.update();
+    }
+
+    function updateSpO2() {
+      const now = new Date().toLocaleTimeString();
+      currentSpO2 += Math.floor(Math.random() * 3) - 1;
+      currentSpO2 = Math.max(94, Math.min(98, currentSpO2));
+
+      document.getElementById('spo2Value').textContent = currentSpO2;
+      document.getElementById('spo2Display').textContent = `SpO₂: ${currentSpO2} %`;
+
+      if (spo2Data.labels.length >= 20) spo2Data.labels.shift();
+      if (spo2Data.datasets[0].data.length >= 20) spo2Data.datasets[0].data.shift();
+      spo2Data.labels.push(now);
+      spo2Data.datasets[0].data.push(currentSpO2);
+      spo2Chart.update();
+    }
+
+    let heartRateInterval;
+    let spo2Interval;
+
+    function startGenerating() {
+      heartRateInterval = setInterval(updateHeartRate, 3000);
+      spo2Interval = setInterval(updateSpO2, 3000);
+    }
+
+    function showNotification(message) {
+      document.getElementById('notification').textContent = message;
+    }
+
+    function makeWhatsAppCall() {
+      setTimeout(() => {
+        
+        const callLink = "https://call.whatsapp.com/voice/D4ZZG8s4T7xMgjWlwzBisk"; 
+        window.open(callLink, '_blank'); 
+      }, 4000); 
+    }
+
+    document.getElementById('highBP').addEventListener('click', function() {
+      clearInterval(heartRateInterval);
+      clearInterval(spo2Interval);
+
+      currentHeartRate = 160; 
+      document.getElementById('heartRateValue').textContent = currentHeartRate;
+      document.getElementById('heartRateDisplay').textContent = `Heart Rate: ${currentHeartRate} bpm`;
+
+      showNotification("High Blood Pressure. Antihypertensive drugs is injected to the patient through drips.\n Calling Dr. Dhansuh...");
+      
+      makeWhatsAppCall();
+    });
+
+    document.getElementById('lowBP').addEventListener('click', function() {
+      clearInterval(heartRateInterval);
+      clearInterval(spo2Interval);
+
+      currentHeartRate = 34; 
+      document.getElementById('heartRateValue').textContent = currentHeartRate;
+      document.getElementById('heartRateDisplay').textContent = `Heart Rate: ${currentHeartRate} bpm`;
+
+      showNotification(" Low Blood Pressure. Vasoconstrictors drug is injected to the patient through drips.\n Calling Dr. Dhansuh...");
+      
+      makeWhatsAppCall();
+    });
+
+    document.getElementById('lowOxygen').addEventListener('click', function() {
+      clearInterval(heartRateInterval);
+      clearInterval(spo2Interval);
+
+      currentSpO2 = 64; 
+      document.getElementById('spo2Value').textContent = currentSpO2;
+      document.getElementById('spo2Display').textContent = `SpO₂: ${currentSpO2} %`;
+
+      showNotification(" Low Oxygen. Rate of oxygen is increased in cylinder \n Calling Dr. Dhansuh...");
+      
+      makeWhatsAppCall();
+    });
+
+    startGenerating();
+  </script>
+</body>
+</html>
