@@ -2,7 +2,7 @@
 
 # Welcome to AYUSHMITRA, an innovative web-based hospital monitoring system designed to simplify and streamline healthcare management.
 
-# Getting Started with Create React App
+## Getting Started with Create React App
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
