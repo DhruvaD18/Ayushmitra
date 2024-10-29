@@ -59,6 +59,7 @@ const Header = () => {
           <Link className="mr-5 hover:text-gray-900" to={'/about'}>About</Link>
           <Link className="mr-5 hover:text-gray-900" to={'/contactus'}>ContactUs</Link>
           <Link className="mr-5 hover:text-gray-900" to={'https://patients-data.vercel.app/'}>Patients</Link>
+          <Link className="mr-5 hover:text-gray-900" to={'https://ayushmitra-bot.streamlit.app/'}>Ayush-AI</Link>
         </nav>
         {user && <div className='flex gap-5 items-center'>
           <Link to={'/userprofile'}><img src='https://tse4.mm.bing.net/th?id=OIP.xk_dSiIK7c695LbAQ3Ua3gHaHa&pid=Api&P=0&h=180' alt='userImg' className='h-10 w-10 rounded-full' /></Link>
